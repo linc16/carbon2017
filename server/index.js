@@ -1,88 +1,43 @@
-'use strict';
+// DEPENDENCIES AND SETUP
+// ===============================================
 
-let path            = require('path'),
-    express         = require('express'),
-    bodyParser      = require('body-parser'),
-    logger          = require('morgan'),
-    _               = require('underscore');
+var express = require('express'),
+    app = express(),
+    port = Number(process.env.PORT || 8080);
 
-let port = process.env.PORT ? process.env.PORT : 8080;
-let env = process.env.NODE_ENV ? process.env.NODE_ENV : 'dev';
+// DATABASE
+// ===============================================
 
-/**********************************************************************************************************/
-
-// Setup our Express pipeline
-let app = express();
-if (env !== 'test') app.use(logger('dev'));
-app.use(express.static(path.join(__dirname, '../../public')));
-//app.engine('pug', require('pug').__express);
-app.set('views', __dirname);
-app.use(bodyParser.urlencoded({ extended: true }));
-
-// Import our routes
-require('./routes')(app);
-
-// Build up the server-side data structures
-app.users = [
-    {
-        username: 'tumbler',
-        password: 'WBush',
-        first_name: 'George',
-        last_name: 'Bush',
-        city: 'Dallas',
-        primary_email: 'decider@dubya.bush.com',
-        games: []
-    },
-    {
-        username: 'eagle',
-        password: 'BlueDress',
-        first_name: 'William',
-        last_name: 'Clinton',
-        city: 'Hope',
-        primary_email: 'slickwilly@clinton.com',
-        games: []
-    },
-    {
-        username: 'renegade',
-        password: 'yeswecan',
-        first_name: 'Barak',
-        last_name: 'Obama',
-        city: 'Chicago',
-        primary_email: 'all.done@potus.gov',
-        games: []
-    },
-    {
-        username: 'timberwolf',
-        password: 'nobroccoli',
-        first_name: 'George',
-        last_name: 'Bush',
-        city: 'Kennebunkport',
-        primary_email: 'notgonnadoit@original.bush.com',
-        games: []
-    },
-    {
-        username: 'rawhide',
-        password: 'lovenancy',
-        first_name: 'Ronald',
-        last_name: 'Reagan',
-        city: 'Los Angeles',
-        primary_email: 'gipper@reagan.com',
-        games: []
-    }
-];
-
-//app.games = [];
-
-/**********************************************************************************************************/
-
-// Give them the SPA base page
-//app.get('*', (req, res) => {
-//    res.render('base.pug', {});
-//});
-
-/**********************************************************************************************************/
-
-// Run the server itself
-let server = app.listen(port, () => {
-    console.log('Example app listening on ' + server.address().port);
+// Setup the database.
+var Datastore = require('nedb');
+var db = new Datastore({
+    filename: 'accounts.db', // provide a path to the database file
+    autoload: true, // automatically load the database
+    timestampData: true // automatically add and manage the fields createdAt and updatedAt
 });
+
+// Let us check that we can save to the database.
+// Define a goal.
+var account = {
+    description: 'Balance is blahblah',
+};
+
+// Save this goal to the database.
+db.insert(account, function(err, newAccount) {
+    if (err) console.log(err);
+    console.log(newAccount);
+});
+
+// ROUTES
+// ===============================================
+
+// Define the home page route.
+app.get('/', function(req, res) {
+    res.send('Hello world!');
+});
+
+// START THE SERVER
+// ===============================================
+
+app.listen(port, function() {
+    console.log('Listening on port ' + port);
